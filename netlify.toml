@@ -1,0 +1,8 @@
+# Configuración de despliegue para Netlify (Frontend React SPA)
+
+# Redireccionar todas las rutas a index.html para que React Router (react-router-dom)
+# maneje la navegación del lado del cliente sin lanzar errores 404 al recargar.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
