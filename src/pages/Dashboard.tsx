@@ -20,12 +20,18 @@ interface ActivityItem {
   timestamp: string;
 }
 
+interface PeriodStatItem {
+  period_name: string;
+  enrollments_count: number;
+}
+
 interface DashboardStats {
   students_count: number;
   professors_count: number;
   courses_count: number;
   enrollments_count: number;
   recent_activity: ActivityItem[];
+  enrollments_by_period: PeriodStatItem[];
 }
 
 interface StudentEnrollment {
@@ -33,12 +39,14 @@ interface StudentEnrollment {
   course_name: string;
   course_code: string;
   period: string;
+  grade: number | null;
 }
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [studentEnrollments, setStudentEnrollments] = useState<StudentEnrollment[]>([]);
+  const [studentPayments, setStudentPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,8 +56,12 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         if (user?.role === 'student') {
           // Si es estudiante, cargar sus matrículas reales para el dashboard
-          const response = await api.get('/enrollments');
-          setStudentEnrollments(response.data);
+          const enrollmentsRes = await api.get('/enrollments');
+          setStudentEnrollments(enrollmentsRes.data);
+
+          // Cargar pagos del estudiante
+          const paymentsRes = await api.get('/payments');
+          setStudentPayments(paymentsRes.data);
         } else {
           // Si es admin/professor, cargar estadísticas de control
           const response = await api.get('/dashboard');
@@ -90,27 +102,54 @@ const Dashboard: React.FC = () => {
     // Calcular créditos reales matriculados (mock de créditos para cursos o podemos simular 4 por curso)
     const totalCredits = studentEnrollments.length * 4; 
 
-    // Calificaciones mock para simular la captura del usuario
-    const mockGrades = [92, 87, 95, 88, 90];
+    // Calificaciones reales o promedio real
+    const gradedEnrollments = studentEnrollments.filter(e => e.grade !== null);
+    const averageGrade = gradedEnrollments.length > 0
+      ? Math.round(gradedEnrollments.reduce((acc, curr) => acc + (curr.grade || 0), 0) / gradedEnrollments.length)
+      : 'Sin notas';
+
+    // Saldo pendiente real de pagos
+    const pendingAmount = studentPayments
+      .filter(p => p.status === 'pending')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const recentPendingPayments = studentPayments.filter(p => p.status === 'pending').slice(0, 3);
 
     return (
       <div className="space-y-6">
         {/* Fila de Tarjetas Resumen */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card Promedio */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Promedio</p>
-            <h3 className="text-4xl font-extrabold text-slate-900 mt-2">88</h3>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Promedio General</p>
+              <h3 className="text-3xl font-extrabold text-slate-900 mt-2">{averageGrade}</h3>
+            </div>
+            <div className="bg-blue-50 text-blue-600 p-4 rounded-xl">
+              <BookMarked size={24} />
+            </div>
           </div>
           {/* Card Créditos */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Créditos Matriculados</p>
-            <h3 className="text-4xl font-extrabold text-slate-900 mt-2">{totalCredits > 0 ? totalCredits : 0}</h3>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Créditos Matriculados</p>
+              <h3 className="text-3xl font-extrabold text-slate-900 mt-2">{totalCredits}</h3>
+            </div>
+            <div className="bg-sky-50 text-sky-600 p-4 rounded-xl">
+              <FileText size={24} />
+            </div>
           </div>
           {/* Card Saldo */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Saldo Pendiente</p>
-            <h3 className="text-4xl font-extrabold text-rose-600 mt-2">$120</h3>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Saldo Pendiente</p>
+              <h3 className={`text-3xl font-extrabold mt-2 ${pendingAmount > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                ${pendingAmount.toLocaleString()}
+              </h3>
+            </div>
+            <div className={`p-4 rounded-xl ${pendingAmount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+              <DollarSign size={24} />
+            </div>
           </div>
         </div>
 
@@ -124,15 +163,20 @@ const Dashboard: React.FC = () => {
             <p className="text-sm text-slate-500 py-4">No estás matriculado en ningún curso actualmente.</p>
           ) : (
             <div className="divide-y divide-slate-100">
-              {studentEnrollments.map((enr, idx) => (
+              {studentEnrollments.map((enr) => (
                 <div key={enr.id} className="py-4 flex items-center justify-between">
                   <div>
                     <h4 className="font-semibold text-slate-800 text-sm">{enr.course_name}</h4>
                     <p className="text-xs text-slate-500 mt-0.5">{enr.course_code} | Período: {enr.period}</p>
                   </div>
-                  {/* Nota en badge suave como en la captura */}
-                  <span className="bg-emerald-50 text-emerald-700 font-bold px-3 py-1.5 rounded-lg text-xs">
-                    {mockGrades[idx % mockGrades.length]}
+                  <span className={`font-bold px-3 py-1.5 rounded-lg text-xs ${
+                    enr.grade !== null 
+                      ? enr.grade >= 70 
+                        ? 'bg-emerald-50 text-emerald-700' 
+                        : 'bg-rose-50 text-rose-700'
+                      : 'bg-slate-50 text-slate-500'
+                  }`}>
+                    {enr.grade !== null ? enr.grade : 'Cursando'}
                   </span>
                 </div>
               ))}
@@ -144,22 +188,35 @@ const Dashboard: React.FC = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center space-x-2">
             <DollarSign className="text-blue-600" size={20} />
-            <span>Próximos Pagos</span>
+            <span>Próximos Pagos Pendientes</span>
           </h2>
-          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <div className="flex items-center space-x-3">
-              <div className="bg-amber-100 text-amber-800 p-2 rounded-lg">
-                <AlertTriangle size={18} />
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-800 text-sm">Cuota Julio 2026</h4>
-                <p className="text-xs text-slate-500 mt-0.5">Vencimiento: 30/07/2026</p>
-              </div>
+          {recentPendingPayments.length === 0 ? (
+            <p className="text-sm text-emerald-600 font-medium py-2 flex items-center space-x-1.5">
+              <span>Al día. No registras cargos pendientes de pago.</span>
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {recentPendingPayments.map((p) => (
+                <div key={p.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-amber-100 text-amber-800 p-2 rounded-lg">
+                      <AlertTriangle size={18} />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-800 text-sm">Pago de Matrícula Pendiente</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">Fecha: {new Date(p.date).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <span className="font-extrabold text-sm text-slate-800">${p.amount}</span>
+                    <span className="bg-amber-50 text-amber-700 border border-amber-200 font-semibold px-3 py-1 rounded-lg text-xs">
+                      Pendiente
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-            <span className="bg-amber-50 text-amber-700 border border-amber-200 font-semibold px-3 py-1 rounded-lg text-xs">
-              Pendiente
-            </span>
-          </div>
+          )}
         </div>
       </div>
     );
@@ -191,6 +248,9 @@ const Dashboard: React.FC = () => {
         return 'bg-slate-100';
     }
   };
+
+  const periodData = stats?.enrollments_by_period || [];
+  const maxEnrollmentsCount = Math.max(...periodData.map(d => d.enrollments_count), 5);
 
   return (
     <div className="space-y-6">
@@ -241,6 +301,81 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
+      </div>
+
+      {/* Gráfico de Matrículas por Período */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center space-x-2">
+          <FileText className="text-blue-600" size={20} />
+          <span>Matrículas por Período Académico</span>
+        </h2>
+        {periodData.length === 0 ? (
+          <p className="text-sm text-slate-500 py-6 text-center">No hay períodos académicos registrados.</p>
+        ) : (
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[500px] h-60 relative flex flex-col justify-end">
+              <svg viewBox="0 0 600 240" className="w-full h-full">
+                {/* Y-Axis Gridlines */}
+                {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
+                  const yVal = 20 + ratio * 160;
+                  const countLabel = Math.round(maxEnrollmentsCount * (1 - ratio));
+                  return (
+                    <g key={index}>
+                      <line x1="50" y1={yVal} x2="560" y2={yVal} stroke="#e2e8f0" strokeDasharray="4 4" />
+                      <text x="15" y={yVal + 4} className="text-[10px] font-semibold text-slate-400" fill="currentColor">
+                        {countLabel}
+                      </text>
+                    </g>
+                  );
+                })}
+                
+                {/* Columns */}
+                {periodData.map((item, idx) => {
+                  const xGap = 510 / periodData.length;
+                  const xPos = 60 + idx * xGap;
+                  const barWidth = Math.min(45, xGap - 20);
+                  const barHeight = (item.enrollments_count / maxEnrollmentsCount) * 160;
+                  const yPos = 180 - barHeight;
+
+                  return (
+                    <g key={item.period_name} className="group cursor-pointer">
+                      {/* Column Rect */}
+                      <rect
+                        x={xPos}
+                        y={yPos}
+                        width={barWidth}
+                        height={barHeight}
+                        rx="6"
+                        className="fill-sky-400 group-hover:fill-navy-800 transition-colors duration-200"
+                      />
+                      {/* Tooltip value */}
+                      <text
+                        x={xPos + barWidth / 2}
+                        y={yPos - 8}
+                        textAnchor="middle"
+                        className="text-[10px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        fill="currentColor"
+                      >
+                        {item.enrollments_count}
+                      </text>
+                      {/* Label X-axis */}
+                      <text
+                        x={xPos + barWidth / 2}
+                        y="205"
+                        textAnchor="middle"
+                        className="text-[10px] font-semibold text-slate-500"
+                        fill="currentColor"
+                      >
+                        {item.period_name}
+                      </text>
+                    </g>
+                  );
+                })}
+                <line x1="50" y1="180" x2="560" y2="180" stroke="#cbd5e1" strokeWidth="2" />
+              </svg>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Actividad Reciente */}

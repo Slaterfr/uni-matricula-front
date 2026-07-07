@@ -7,7 +7,11 @@ import {
   GraduationCap,
   BookOpen,
   FileText,
-  Award
+  Award,
+  Calendar,
+  CreditCard,
+  Shield,
+  UserCheck
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -45,6 +49,36 @@ const Sidebar: React.FC = () => {
       name: 'Matrículas',
       icon: <FileText size={18} />,
       roles: ['admin', 'student'],
+    },
+    {
+      path: '/periods',
+      name: 'Períodos',
+      icon: <Calendar size={18} />,
+      roles: ['admin'],
+    },
+    {
+      path: '/grades',
+      name: 'Calificaciones',
+      icon: <Award size={18} />,
+      roles: ['admin', 'professor', 'student'],
+    },
+    {
+      path: '/payments',
+      name: 'Pagos',
+      icon: <CreditCard size={18} />,
+      roles: ['admin', 'student'],
+    },
+    {
+      path: '/users',
+      name: 'Usuarios',
+      icon: <UserCheck size={18} />,
+      roles: ['admin'],
+    },
+    {
+      path: '/roles',
+      name: 'Roles',
+      icon: <Shield size={18} />,
+      roles: ['admin'],
     },
   ];
 
