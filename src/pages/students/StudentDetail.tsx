@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import { ArrowLeft, User, CreditCard, Award, Phone, Mail, FileText, AlertCircle } from 'lucide-react';
 
 interface Student {
@@ -28,6 +29,7 @@ interface Payment {
 }
 
 const StudentDetail: React.FC = () => {
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [student, setStudent] = useState<Student | null>(null);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -49,10 +51,12 @@ const StudentDetail: React.FC = () => {
         const studentEnrollments = enrollmentsRes.data.filter((e: any) => e.student_id === id);
         setEnrollments(studentEnrollments);
 
-        // 3. Cargar pagos y filtrar por estudiante
-        const paymentsRes = await api.get('/payments');
-        const studentPayments = paymentsRes.data.filter((p: any) => p.student_id === id);
-        setPayments(studentPayments);
+        // 3. Cargar pagos y filtrar por estudiante si no es profesor
+        if (user?.role === 'admin' || user?.role === 'student') {
+          const paymentsRes = await api.get('/payments');
+          const studentPayments = paymentsRes.data.filter((p: any) => p.student_id === id);
+          setPayments(studentPayments);
+        }
       } catch (err: any) {
         console.error('Error fetching student detail data:', err);
         setError('No se pudo cargar la información del estudiante.');
@@ -62,7 +66,7 @@ const StudentDetail: React.FC = () => {
     };
 
     if (id) fetchStudentData();
-  }, [id]);
+  }, [id, user]);
 
   if (loading) {
     return (
@@ -148,20 +152,22 @@ const StudentDetail: React.FC = () => {
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></span>
           )}
         </button>
-        <button
-          onClick={() => setActiveTab('payments')}
-          className={`pb-3 relative transition-colors ${
-            activeTab === 'payments' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <span className="flex items-center space-x-1.5">
-            <CreditCard size={16} />
-            <span>Historial de Pagos</span>
-          </span>
-          {activeTab === 'payments' && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></span>
-          )}
-        </button>
+        {(user?.role === 'admin' || user?.role === 'student') && (
+          <button
+            onClick={() => setActiveTab('payments')}
+            className={`pb-3 relative transition-colors ${
+              activeTab === 'payments' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <span className="flex items-center space-x-1.5">
+              <CreditCard size={16} />
+              <span>Historial de Pagos</span>
+            </span>
+            {activeTab === 'payments' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></span>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Contenido de Tabs */}

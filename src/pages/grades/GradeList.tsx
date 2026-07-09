@@ -152,7 +152,7 @@ const GradeList: React.FC = () => {
         <div className="space-y-6">
           {/* Promedio General */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-550 to-navy-800 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-950 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
               <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-10">
                 <Award size={160} />
               </div>

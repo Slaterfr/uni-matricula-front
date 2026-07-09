@@ -44,7 +44,7 @@ const EnrollmentList: React.FC = () => {
     const confirmMessage = isStudent
       ? `¿Estás seguro de que deseas desmatricularte del curso "${courseName}"?`
       : `¿Estás seguro de que deseas eliminar la matrícula del estudiante "${studentName}" en el curso "${courseName}"?`;
-      
+
     if (!window.confirm(confirmMessage)) {
       return;
     }
@@ -68,15 +68,15 @@ const EnrollmentList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      
+
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Control de Matrículas</h2>
           <p className="text-xs text-slate-500 mt-1">
-            {isStudent 
-              ? 'Listado de asignaturas en las que estás registrado oficialmente.' 
-              : 'Control y registro de inscripciones estudiantiles para el período activo.'}
+            {isStudent
+              ? 'Listado de asignaturas en las que estás registrado oficialmente.'
+              : 'Control y registro de inscripciones estudiantiles.'}
           </p>
         </div>
         {!isProfessor && (
