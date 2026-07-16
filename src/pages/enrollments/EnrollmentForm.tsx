@@ -66,7 +66,7 @@ const EnrollmentForm: React.FC = () => {
           const parts = name.trim().split(/\s+/);
           if (parts.length >= 2) {
             const roman = parts[0];
-            const year = parseInt(parts[1], 10);
+            const year = parseInt(parts[parts.length - 1], 10);
             return { year: isNaN(year) ? 0 : year, num: romanToNum[roman] || 0 };
           }
           return { year: 0, num: 0 };

@@ -42,6 +42,22 @@ interface StudentEnrollment {
   grade: number | null;
 }
 
+const formatActivityTime = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const day = date.getDate();
+  const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // hour 0 is 12
+  
+  return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+};
+
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -409,7 +425,7 @@ const Dashboard: React.FC = () => {
                   <h4 className="font-semibold text-slate-800 text-sm">{item.description}</h4>
                   <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1">
                     <Clock size={12} />
-                    <span>{new Date(item.timestamp).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    <span>{formatActivityTime(item.timestamp)}</span>
                   </p>
                 </div>
               </div>
