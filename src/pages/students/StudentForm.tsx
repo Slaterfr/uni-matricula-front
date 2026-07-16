@@ -46,6 +46,16 @@ const StudentForm: React.FC = () => {
     setError(null);
     setLoading(true);
 
+    // Validar cédula (solo dígitos, exactamente 9 caracteres)
+    if (!isEditMode) {
+      const carnetRegex = /^\d{9}$/;
+      if (!carnetRegex.test(carnet.trim())) {
+        setError('La cédula debe contener exactamente 9 dígitos numéricos, sin guiones ni espacios (ej: 102340567).');
+        setLoading(false);
+        return;
+      }
+    }
+
     // Validar nombre
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s-]+$/;
     if (!nameRegex.test(name.trim())) {
@@ -63,7 +73,15 @@ const StudentForm: React.FC = () => {
       return;
     }
 
-    const cleanName = name.trim();
+    const toTitleCase = (str: string): string => {
+      return str
+        .toLowerCase()
+        .split(/\s+/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+
+    const cleanName = toTitleCase(name.trim());
     const cleanPhone = phone.trim();
 
     const payload = {
