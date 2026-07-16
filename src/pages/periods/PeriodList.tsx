@@ -28,7 +28,28 @@ const PeriodList: React.FC = () => {
     try {
       setLoading(true);
       const response = await api.get('/periods');
-      setPeriods(response.data);
+      
+      const parsePeriodName = (name: string) => {
+        const romanToNum: Record<string, number> = { I: 1, II: 2, III: 3, IV: 4 };
+        const parts = name.trim().split(/\s+/);
+        if (parts.length >= 2) {
+          const roman = parts[0];
+          const year = parseInt(parts[1], 10);
+          return { year: isNaN(year) ? 0 : year, num: romanToNum[roman] || 0 };
+        }
+        return { year: 0, num: 0 };
+      };
+
+      const sorted = [...response.data].sort((a, b) => {
+        const valA = parsePeriodName(a.name);
+        const valB = parsePeriodName(b.name);
+        if (valA.year !== valB.year) {
+          return valA.year - valB.year;
+        }
+        return valA.num - valB.num;
+      });
+
+      setPeriods(sorted);
     } catch (err: any) {
       console.error('Error fetching periods:', err);
       setError('No se pudo cargar la lista de períodos académicos.');
@@ -70,34 +91,17 @@ const PeriodList: React.FC = () => {
 
     try {
       if (editingPeriod) {
-        // Actualizar
-        const response = await api.put(`/periods/${editingPeriod.id}`, {
+        await api.put(`/periods/${editingPeriod.id}`, {
           name: name.trim(),
           is_active: isActive,
         });
-        
-        // Si activamos el período, desactivamos todos los demás localmente
-        if (isActive) {
-          setPeriods(periods.map(p => p.id === editingPeriod.id 
-            ? response.data 
-            : { ...p, is_active: false }
-          ));
-        } else {
-          setPeriods(periods.map(p => p.id === editingPeriod.id ? response.data : p));
-        }
       } else {
-        // Crear nuevo
-        const response = await api.post('/periods', {
+        await api.post('/periods', {
           name: name.trim(),
           is_active: isActive,
         });
-
-        if (isActive) {
-          setPeriods([response.data, ...periods.map(p => ({ ...p, is_active: false }))]);
-        } else {
-          setPeriods([response.data, ...periods]);
-        }
       }
+      await fetchPeriods();
       setModalOpen(false);
     } catch (err: any) {
       console.error('Error saving period:', err);

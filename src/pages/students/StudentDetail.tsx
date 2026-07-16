@@ -245,7 +245,7 @@ const StudentDetail: React.FC = () => {
                   {payments.map((pay) => (
                     <tr key={pay.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4 font-extrabold text-slate-900">
-                        ${pay.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ₡{pay.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td className="px-6 py-4 text-slate-500">
                         {new Date(pay.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}

@@ -42,18 +42,38 @@ const ProfessorForm: React.FC = () => {
     setError(null);
     setLoading(true);
 
+    // Validar nombre
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s-]+$/;
+    if (!nameRegex.test(name.trim())) {
+      setError('El nombre completo solo puede contener letras, tildes y espacios.');
+      setLoading(false);
+      return;
+    }
+
+    // Validar correo
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleanEmail = email.toLowerCase().trim();
+    if (!emailRegex.test(cleanEmail)) {
+      setError('Por favor, ingresa un correo electrónico válido (ej: usuario@dominio.com).');
+      setLoading(false);
+      return;
+    }
+
+    const cleanName = name.trim();
+    const cleanSpecialty = specialty.trim();
+
     const payload = {
-      name,
-      email,
-      specialty,
+      name: cleanName,
+      email: cleanEmail,
+      specialty: cleanSpecialty,
     };
 
     try {
       if (isEditMode) {
         await api.put(`/professors/${id}`, {
-          name,
-          email,
-          specialty,
+          name: cleanName,
+          email: cleanEmail,
+          specialty: cleanSpecialty,
         });
       } else {
         await api.post('/professors', payload);
@@ -139,7 +159,7 @@ const ProfessorForm: React.FC = () => {
               placeholder="Ej: manuel.salas@universidad.com"
               disabled={isEditMode}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value.toLowerCase())}
               className="block w-full px-4 py-2.5 bg-slate-800 text-white border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>

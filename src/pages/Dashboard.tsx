@@ -144,7 +144,7 @@ const Dashboard: React.FC = () => {
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Saldo Pendiente</p>
               <h3 className={`text-3xl font-extrabold mt-2 ${pendingAmount > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                ${pendingAmount.toLocaleString()}
+                ₡{pendingAmount.toLocaleString()}
               </h3>
             </div>
             <div className={`p-4 rounded-xl ${pendingAmount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
@@ -208,7 +208,7 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <span className="font-extrabold text-sm text-slate-800">${p.amount}</span>
+                    <span className="font-extrabold text-sm text-slate-800">₡{p.amount}</span>
                     <span className="bg-amber-50 text-amber-700 border border-amber-200 font-semibold px-3 py-1 rounded-lg text-xs">
                       Pendiente
                     </span>
@@ -315,14 +315,24 @@ const Dashboard: React.FC = () => {
           <div className="w-full overflow-x-auto">
             <div className="min-w-[500px] h-60 relative flex flex-col justify-end">
               <svg viewBox="0 0 600 240" className="w-full h-full">
+                {/* Rotated Y-Axis Label */}
+                <text
+                  transform="translate(12, 100) rotate(-90)"
+                  textAnchor="middle"
+                  className="text-[9px] font-bold text-slate-400 uppercase tracking-wider"
+                  fill="currentColor"
+                >
+                  Matrículas
+                </text>
+
                 {/* Y-Axis Gridlines */}
                 {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
                   const yVal = 20 + ratio * 160;
                   const countLabel = Math.round(maxEnrollmentsCount * (1 - ratio));
                   return (
                     <g key={index}>
-                      <line x1="50" y1={yVal} x2="560" y2={yVal} stroke="#e2e8f0" strokeDasharray="4 4" />
-                      <text x="15" y={yVal + 4} className="text-[10px] font-semibold text-slate-400" fill="currentColor">
+                      <line x1="60" y1={yVal} x2="570" y2={yVal} stroke="#e2e8f0" strokeDasharray="4 4" />
+                      <text x="35" y={yVal + 4} textAnchor="end" className="text-[10px] font-semibold text-slate-400" fill="currentColor">
                         {countLabel}
                       </text>
                     </g>
@@ -331,8 +341,8 @@ const Dashboard: React.FC = () => {
                 
                 {/* Columns */}
                 {periodData.map((item, idx) => {
-                  const xGap = 510 / periodData.length;
-                  const xPos = 60 + idx * xGap;
+                  const xGap = 490 / periodData.length;
+                  const xPos = 70 + idx * xGap;
                   const barWidth = Math.min(45, xGap - 20);
                   const barHeight = (item.enrollments_count / maxEnrollmentsCount) * 160;
                   const yPos = 180 - barHeight;
@@ -371,7 +381,7 @@ const Dashboard: React.FC = () => {
                     </g>
                   );
                 })}
-                <line x1="50" y1="180" x2="560" y2="180" stroke="#cbd5e1" strokeWidth="2" />
+                <line x1="60" y1="180" x2="570" y2="180" stroke="#cbd5e1" strokeWidth="2" />
               </svg>
             </div>
           </div>

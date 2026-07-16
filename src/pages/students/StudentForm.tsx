@@ -46,20 +46,40 @@ const StudentForm: React.FC = () => {
     setError(null);
     setLoading(true);
 
+    // Validar nombre
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s-]+$/;
+    if (!nameRegex.test(name.trim())) {
+      setError('El nombre completo solo puede contener letras, tildes y espacios.');
+      setLoading(false);
+      return;
+    }
+
+    // Validar correo
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleanEmail = email.toLowerCase().trim();
+    if (!emailRegex.test(cleanEmail)) {
+      setError('Por favor, ingresa un correo electrónico válido (ej: usuario@dominio.com).');
+      setLoading(false);
+      return;
+    }
+
+    const cleanName = name.trim();
+    const cleanPhone = phone.trim();
+
     const payload = {
-      carnet,
-      name,
-      email,
-      phone,
+      carnet: carnet.trim(),
+      name: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
       ...(isEditMode && { status }),
     };
 
     try {
       if (isEditMode) {
         await api.put(`/students/${id}`, {
-          name,
-          email,
-          phone,
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
           status,
         });
       } else {
@@ -162,7 +182,7 @@ const StudentForm: React.FC = () => {
               required
               placeholder="Ej: juan.perez@universidad.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value.toLowerCase())}
               className="block w-full px-4 py-2.5 bg-slate-800 text-white border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

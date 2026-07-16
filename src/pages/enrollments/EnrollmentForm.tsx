@@ -61,12 +61,32 @@ const EnrollmentForm: React.FC = () => {
 
         // 2. Cargar periodos
         const periodsRes = await api.get('/periods');
-        setPeriods(periodsRes.data);
-        const activePeriod = periodsRes.data.find((p: any) => p.is_active);
+        const parsePeriodName = (name: string) => {
+          const romanToNum: Record<string, number> = { I: 1, II: 2, III: 3, IV: 4 };
+          const parts = name.trim().split(/\s+/);
+          if (parts.length >= 2) {
+            const roman = parts[0];
+            const year = parseInt(parts[1], 10);
+            return { year: isNaN(year) ? 0 : year, num: romanToNum[roman] || 0 };
+          }
+          return { year: 0, num: 0 };
+        };
+
+        const sortedPeriods = [...periodsRes.data].sort((a, b) => {
+          const valA = parsePeriodName(a.name);
+          const valB = parsePeriodName(b.name);
+          if (valA.year !== valB.year) {
+            return valA.year - valB.year;
+          }
+          return valA.num - valB.num;
+        });
+
+        setPeriods(sortedPeriods);
+        const activePeriod = sortedPeriods.find((p: any) => p.is_active);
         if (activePeriod) {
           setPeriodId(activePeriod.id);
-        } else if (periodsRes.data.length > 0) {
-          setPeriodId(periodsRes.data[0].id);
+        } else if (sortedPeriods.length > 0) {
+          setPeriodId(sortedPeriods[0].id);
         }
 
         // 3. Cargar matrículas generales para calcular cupos
@@ -117,11 +137,11 @@ const EnrollmentForm: React.FC = () => {
   // Asignar horario simulado
   const getCourseSchedule = (idx: number) => {
     const schedules = [
-      'Lun-Mié 8:00am',
-      'Mar-Jue 10:00am',
-      'Vie 7:00am',
-      'Lun-Mié 2:00pm',
-      'Sáb 9:00am'
+      'Lun-Mié 8:00 AM',
+      'Mar-Jue 10:00 AM',
+      'Vie 7:00 AM',
+      'Lun-Mié 2:00 PM',
+      'Sáb 9:00 AM'
     ];
     return schedules[idx % schedules.length];
   };

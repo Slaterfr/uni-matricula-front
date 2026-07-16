@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
-import { Plus, CreditCard, CheckCircle, AlertCircle, Clock, Trash2, X, Search, DollarSign } from 'lucide-react';
+import { Plus, CreditCard, CheckCircle, AlertCircle, Clock, Trash2, X, Search, DollarSign, Printer } from 'lucide-react';
 
 interface Payment {
   id: string;
@@ -24,6 +24,91 @@ const PaymentList: React.FC = () => {
   const [students, setStudents] = useState<StudentOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handlePrint = (payment: Payment) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const formattedAmount = payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formattedDate = new Date(payment.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    const statusText = payment.status === 'paid' ? 'PAGADO' : payment.status === 'pending' ? 'PENDIENTE' : 'CANCELADO';
+    const statusColor = payment.status === 'paid' ? '#047857' : payment.status === 'pending' ? '#b45309' : '#64748b';
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Comprobante de Pago #${payment.id.substring(0, 8)}</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #1e293b; background: #fff; }
+            .receipt-box { border: 2px solid #e2e8f0; padding: 32px; border-radius: 16px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+            .brand-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0f172a; padding-bottom: 16px; margin-bottom: 24px; }
+            .brand-title { font-size: 24px; font-weight: 850; color: #0f172a; letter-spacing: -0.025em; }
+            .brand-subtitle { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+            .receipt-title { font-size: 16px; font-weight: 800; color: #0f172a; background: #f1f5f9; padding: 6px 12px; border-radius: 6px; text-transform: uppercase; }
+            .info-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+            .info-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; font-size: 14px; }
+            .info-label { font-weight: 650; color: #475569; }
+            .info-value { font-weight: 700; color: #0f172a; }
+            .status-badge { color: white; background: ${statusColor}; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 800; }
+            .amount-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; margin-top: 24px; }
+            .amount-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+            .amount-value { font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 4px; }
+            .footer-note { border-top: 1px solid #e2e8f0; margin-top: 32px; padding-top: 16px; font-size: 11px; color: #94a3b8; text-align: center; font-weight: 500; }
+          </style>
+        </head>
+        <body>
+          <div class="receipt-box">
+            <div class="brand-header">
+              <div>
+                <div class="brand-title">UniMatrícula</div>
+                <div class="brand-subtitle">Universidad Politécnica Costarricense</div>
+              </div>
+              <div class="receipt-title">Comprobante de Cobro</div>
+            </div>
+            
+            <div class="info-grid">
+              <div class="info-row">
+                <span class="info-label">Estudiante:</span>
+                <span class="info-value">${payment.student_name}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Carnet:</span>
+                <span class="info-value">${payment.student_carnet}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Fecha de Registro:</span>
+                <span class="info-value">${formattedDate}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Estado de Transacción:</span>
+                <span class="status-badge">${statusText}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">ID de Transacción:</span>
+                <span class="info-value" style="font-family: monospace; font-size: 12px;">${payment.id}</span>
+              </div>
+            </div>
+
+            <div class="amount-box">
+              <div class="amount-title">Total Cobrado</div>
+              <div class="amount-value">₡${formattedAmount}</div>
+            </div>
+
+            <div class="footer-note">
+              Este documento sirve como comprobante de cobro administrativo oficial emitido por el Sistema de Gestión Académica (SGA).
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
   
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -196,7 +281,7 @@ const PaymentList: React.FC = () => {
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Estado de Pagos</h2>
+          <h2 className="text-xl font-bold text-slate-900">Control de Facturación</h2>
           <p className="text-xs text-slate-500 mt-1">
             {isStudent 
               ? 'Revisa tus cuotas académicas pendientes e historial de pagos completados.'
@@ -209,7 +294,7 @@ const PaymentList: React.FC = () => {
             className="inline-flex items-center space-x-2 bg-navy-800 hover:bg-navy-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
           >
             <Plus size={16} />
-            <span>Registrar Pago</span>
+            <span>Emitir Recibo de Cobro</span>
           </button>
         )}
       </div>
@@ -225,8 +310,8 @@ const PaymentList: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Recaudado / Pagado</p>
-            <p className="text-3xl font-extrabold text-emerald-600 mt-2">${totalPaid.toLocaleString()}</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Facturado / Recaudado</p>
+            <p className="text-3xl font-extrabold text-emerald-600 mt-2">₡{totalPaid.toLocaleString()}</p>
           </div>
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
             <DollarSign size={24} />
@@ -235,8 +320,8 @@ const PaymentList: React.FC = () => {
 
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Pendiente de Cobro</p>
-            <p className="text-3xl font-extrabold text-amber-600 mt-2">${totalPending.toLocaleString()}</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Pendiente de Pago</p>
+            <p className="text-3xl font-extrabold text-amber-600 mt-2">₡{totalPending.toLocaleString()}</p>
           </div>
           <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
             <Clock size={24} />
@@ -279,6 +364,7 @@ const PaymentList: React.FC = () => {
                   <th className="px-6 py-4">Monto</th>
                   <th className="px-6 py-4">Fecha de Registro</th>
                   <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4 text-center">Comprobante</th>
                   {isAdmin && <th className="px-6 py-4 text-center">Acciones</th>}
                 </tr>
               </thead>
@@ -292,13 +378,22 @@ const PaymentList: React.FC = () => {
                       </td>
                     )}
                     <td className="px-6 py-4 font-extrabold text-slate-900">
-                      ${payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ₡{payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="px-6 py-4 text-slate-500">
                       {new Date(payment.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                     </td>
                     <td className="px-6 py-4">
                       {getStatusBadge(payment.status)}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => handlePrint(payment)}
+                        className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Imprimir Comprobante"
+                      >
+                        <Printer size={16} />
+                      </button>
                     </td>
                     {isAdmin && (
                       <td className="px-6 py-4">
@@ -334,7 +429,7 @@ const PaymentList: React.FC = () => {
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
               <h3 className="text-lg font-bold text-slate-900">
-                {editingPayment ? 'Actualizar Estado del Pago' : 'Registrar Nuevo Pago'}
+                {editingPayment ? 'Actualizar Estado de Facturación' : 'Emitir Recibo de Cobro'}
               </h3>
               <button onClick={handleCloseModal} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
                 <X size={20} />
@@ -357,7 +452,7 @@ const PaymentList: React.FC = () => {
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
                   disabled={editingPayment !== null}
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 text-sm font-semibold disabled:bg-slate-50 disabled:text-slate-450"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 text-sm font-semibold disabled:bg-slate-50 disabled:text-slate-405"
                 >
                   <option value="">Selecciona un estudiante</option>
                   {students.map((s) => (
@@ -370,7 +465,7 @@ const PaymentList: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
-                  Monto ($)
+                  Monto (₡)
                 </label>
                 <input
                   type="number"
@@ -410,7 +505,7 @@ const PaymentList: React.FC = () => {
                   type="submit"
                   className="px-5 py-2 bg-navy-800 hover:bg-navy-900 text-white rounded-lg text-sm font-semibold transition-colors"
                 >
-                  {editingPayment ? 'Guardar Cambios' : 'Registrar Pago'}
+                  {editingPayment ? 'Guardar Cambios' : 'Emitir Cobro'}
                 </button>
               </div>
             </form>

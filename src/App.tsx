@@ -17,6 +17,7 @@ import GradeList from './pages/grades/GradeList';
 import PaymentList from './pages/payments/PaymentList';
 import UserList from './pages/users/UserList';
 import RoleList from './pages/roles/RoleList';
+import FAQ from './pages/FAQ';
 
 // Componente para proteger rutas privadas
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -66,6 +67,7 @@ function App() {
                     <Route path="/payments" element={<PaymentList />} />
                     <Route path="/users" element={<UserList />} />
                     <Route path="/roles" element={<RoleList />} />
+                    <Route path="/faq" element={<FAQ />} />
                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
                   </Routes>
                 </Layout>

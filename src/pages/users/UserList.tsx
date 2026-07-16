@@ -86,6 +86,13 @@ const UserList: React.FC = () => {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleanEmail = email.toLowerCase().trim();
+    if (!emailRegex.test(cleanEmail)) {
+      setSubmitError('Por favor, ingresa un correo electrónico válido (ej: usuario@dominio.com).');
+      return;
+    }
+
     if (!editingUser && !password) {
       setSubmitError('La contraseña es requerida para nuevos usuarios.');
       return;
@@ -95,7 +102,7 @@ const UserList: React.FC = () => {
       if (editingUser) {
         // Actualizar
         const payload: any = {
-          email: email.trim(),
+          email: cleanEmail,
           role_id: roleId,
           is_active: isActive,
         };
@@ -106,7 +113,7 @@ const UserList: React.FC = () => {
       } else {
         // Crear nuevo
         const response = await api.post('/users', {
-          email: email.trim(),
+          email: cleanEmail,
           password,
           role_id: roleId,
           is_active: isActive,
@@ -275,7 +282,7 @@ const UserList: React.FC = () => {
                   type="email"
                   placeholder="ejemplo@universidad.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase())}
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 text-sm font-semibold"
                 />
               </div>

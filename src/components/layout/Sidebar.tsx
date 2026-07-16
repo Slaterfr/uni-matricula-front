@@ -12,7 +12,8 @@ import {
   CreditCard,
   Shield,
   UserCheck,
-  X
+  X,
+  HelpCircle
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -85,6 +86,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       name: 'Roles',
       icon: <Shield size={18} />,
       roles: ['admin'],
+    },
+    {
+      path: '/faq',
+      name: 'Preguntas Frecuentes',
+      icon: <HelpCircle size={18} />,
+      roles: ['admin', 'professor', 'student'],
     },
   ];
 

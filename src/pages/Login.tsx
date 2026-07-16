@@ -17,7 +17,7 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(email.toLowerCase().trim(), password);
       navigate('/dashboard');
     } catch (err: any) {
       setError(
@@ -69,7 +69,7 @@ const Login: React.FC = () => {
                   required
                   placeholder="ejemplo@universidad.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase())}
                   className="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 />
               </div>
