@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Award, Lock, Mail, AlertCircle } from 'lucide-react';
+import { Lock, Mail, AlertCircle } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -35,8 +35,8 @@ const Login: React.FC = () => {
         
         {/* Encabezado con logo */}
         <div className="bg-white p-8 text-center border-b border-slate-100">
-          <div className="inline-flex bg-navy-800 p-3 rounded-2xl shadow-lg mb-4 text-white">
-            <Award size={36} />
+          <div className="inline-flex mb-4">
+            <img src="/favicon.svg" alt="UniMatrícula Logo" className="w-16 h-16 rounded-2xl object-contain shadow-lg" />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-800">UniMatrícula</h2>
           <p className="text-sm text-slate-500 mt-1">

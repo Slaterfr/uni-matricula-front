@@ -111,12 +111,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-blue-50 text-slate-600 flex flex-col border-r border-blue-100 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:flex ${isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
 
-        {/* Logotipo del Sistema */}
         <div className="p-6 border-b border-blue-100 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="bg-navy-800 p-1.5 rounded-lg text-white">
-              <Award size={20} />
-            </div>
+            <img src="/favicon.svg" alt="UniMatrícula Logo" className="w-8 h-8 rounded-lg object-contain" />
             <span className="font-bold text-base text-navy-800 tracking-wide">
               UniMatrícula
             </span>
