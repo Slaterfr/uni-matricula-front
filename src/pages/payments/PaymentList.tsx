@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
-import { Plus, CreditCard, CheckCircle, AlertCircle, Clock, Trash2, X, Search, DollarSign, Printer } from 'lucide-react';
+import { Plus, CreditCard, CheckCircle, AlertCircle, Clock, Trash2, X, Search, Printer } from 'lucide-react';
 
 interface Payment {
   id: string;
@@ -29,7 +29,7 @@ const PaymentList: React.FC = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     
-    const formattedAmount = payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formattedAmount = payment.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     const formattedDate = new Date(payment.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
     const statusText = payment.status === 'paid' ? 'PAGADO' : payment.status === 'pending' ? 'PENDIENTE' : 'CANCELADO';
     const statusColor = payment.status === 'paid' ? '#047857' : payment.status === 'pending' ? '#b45309' : '#64748b';
@@ -90,7 +90,7 @@ const PaymentList: React.FC = () => {
             </div>
 
             <div class="amount-box">
-              <div class="amount-title">Total Cobrado</div>
+              <div class="amount-title">Total de la Transacción</div>
               <div class="amount-value">₡${formattedAmount}</div>
             </div>
 
@@ -306,22 +306,21 @@ const PaymentList: React.FC = () => {
         </div>
       )}
 
-      {/* Cards de Resumen */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Facturado / Recaudado</p>
-            <p className="text-3xl font-extrabold text-emerald-600 mt-2">₡{totalPaid.toLocaleString()}</p>
+            <p className="text-3xl font-extrabold text-emerald-600 mt-2">₡{totalPaid.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
           </div>
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <DollarSign size={24} />
+            <CreditCard size={24} />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Pendiente de Pago</p>
-            <p className="text-3xl font-extrabold text-amber-600 mt-2">₡{totalPending.toLocaleString()}</p>
+            <p className="text-3xl font-extrabold text-amber-600 mt-2">₡{totalPending.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
           </div>
           <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
             <Clock size={24} />
@@ -378,7 +377,7 @@ const PaymentList: React.FC = () => {
                       </td>
                     )}
                     <td className="px-6 py-4 font-extrabold text-slate-900">
-                      ₡{payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ₡{payment.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </td>
                     <td className="px-6 py-4 text-slate-500">
                       {new Date(payment.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}

@@ -9,7 +9,7 @@ import {
   Clock,
   UserCheck,
   BookMarked,
-  DollarSign,
+  CreditCard,
   AlertTriangle
 } from 'lucide-react';
 
@@ -160,11 +160,11 @@ const Dashboard: React.FC = () => {
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Saldo Pendiente</p>
               <h3 className={`text-3xl font-extrabold mt-2 ${pendingAmount > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                ₡{pendingAmount.toLocaleString()}
+                ₡{pendingAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </h3>
             </div>
             <div className={`p-4 rounded-xl ${pendingAmount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-              <DollarSign size={24} />
+              <CreditCard size={24} />
             </div>
           </div>
         </div>
@@ -203,7 +203,7 @@ const Dashboard: React.FC = () => {
         {/* Próximos Pagos */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center space-x-2">
-            <DollarSign className="text-blue-600" size={20} />
+            <CreditCard className="text-blue-600" size={20} />
             <span>Próximos Pagos Pendientes</span>
           </h2>
           {recentPendingPayments.length === 0 ? (
@@ -224,7 +224,7 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <span className="font-extrabold text-sm text-slate-800">₡{p.amount}</span>
+                    <span className="font-extrabold text-sm text-slate-800">₡{p.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                     <span className="bg-amber-50 text-amber-700 border border-amber-200 font-semibold px-3 py-1 rounded-lg text-xs">
                       Pendiente
                     </span>
