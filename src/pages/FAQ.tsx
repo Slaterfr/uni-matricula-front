@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HelpCircle, ChevronDown, ChevronUp, BookOpen, CreditCard, ShieldAlert, Award } from 'lucide-react';
+import { HelpCircle, ChevronDown, ChevronUp, BookOpen, CreditCard, ShieldAlert, Award, FileText, Download } from 'lucide-react';
 
 interface FAQItem {
   question: string;
@@ -85,7 +85,7 @@ const FAQ: React.FC = () => {
         {faqs.map((faq, index) => {
           const isOpen = openIndex === index;
           return (
-            <div 
+            <div
               key={index}
               className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200"
             >
@@ -101,22 +101,21 @@ const FAQ: React.FC = () => {
                     {faq.icon}
                     <span className="ml-1">{faq.category}</span>
                   </span>
-                  
+
                   <span className="font-bold text-slate-800 text-sm sm:text-base leading-snug">
                     {faq.question}
                   </span>
                 </div>
-                
+
                 <span className="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
                   {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </span>
               </button>
 
               {/* Panel de respuesta */}
-              <div 
-                className={`transition-all duration-300 ease-in-out ${
-                  isOpen ? 'max-h-[500px] border-t border-slate-100 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-                }`}
+              <div
+                className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[500px] border-t border-slate-100 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+                  }`}
               >
                 <div className="px-6 py-5 text-sm text-slate-600 leading-relaxed bg-slate-50/30">
                   {faq.answer}
@@ -125,6 +124,29 @@ const FAQ: React.FC = () => {
             </div>
           );
         })}
+      </div>
+
+      {/* Sección de Recursos / Descarga de Manual */}
+      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start space-x-3.5">
+          <div className="bg-blue-100 text-blue-600 p-3 rounded-xl flex-shrink-0">
+            <FileText size={24} />
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-800 text-sm sm:text-base">Manual de Usuario & Reglamento de Matrícula</h4>
+            <p className="text-xs text-slate-500 mt-1 leading-relaxed max-w-lg">
+              Descarga el documento oficial de Word con los manuales detallados de procedimientos, políticas de cobro y lineamientos del sistema UniMatrícula.
+            </p>
+          </div>
+        </div>
+        <a
+          href="/documentacionUniMatricula.docx"
+          download
+          className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm w-full sm:w-auto justify-center"
+        >
+          <Download size={16} />
+          <span>Descargar DOCX</span>
+        </a>
       </div>
     </div>
   );
