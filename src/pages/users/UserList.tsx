@@ -226,20 +226,25 @@ const UserList: React.FC = () => {
                       <div className="flex items-center justify-center space-x-2">
                         <button
                           onClick={() => handleOpenEdit(item)}
-                          className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Editar usuario"
+                          disabled={item.email === 'admin@universidad.com'}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            item.email === 'admin@universidad.com'
+                              ? 'text-slate-300 cursor-not-allowed'
+                              : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'
+                          }`}
+                          title={item.email === 'admin@universidad.com' ? 'El administrador principal no puede ser modificado' : 'Editar usuario'}
                         >
                           <Edit2 size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(item.id, item.email)}
-                          disabled={item.email === loggedInUser?.email}
+                          disabled={item.email === 'admin@universidad.com' || item.email === loggedInUser?.email}
                           className={`p-1.5 rounded-lg transition-colors ${
-                            item.email === loggedInUser?.email 
+                            (item.email === 'admin@universidad.com' || item.email === loggedInUser?.email)
                               ? 'text-slate-300 cursor-not-allowed' 
                               : 'text-slate-600 hover:text-rose-600 hover:bg-rose-50'
                           }`}
-                          title="Eliminar usuario"
+                          title={item.email === 'admin@universidad.com' ? 'El administrador principal no puede ser eliminado' : 'Eliminar usuario'}
                         >
                           <Trash2 size={16} />
                         </button>
