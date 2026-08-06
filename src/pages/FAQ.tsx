@@ -133,7 +133,7 @@ const FAQ: React.FC = () => {
             <FileText size={24} />
           </div>
           <div>
-            <h4 className="font-bold text-slate-800 text-sm sm:text-base">Manual de Usuario & Reglamento de Matrícula</h4>
+            <h4 className="font-bold text-slate-800 text-sm sm:text-base">Manual de Usuario y Reglamento de Matrícula</h4>
             <p className="text-xs text-slate-500 mt-1 leading-relaxed max-w-lg">
               Descarga el documento oficial de Word con los manuales detallados de procedimientos, políticas de cobro y lineamientos del sistema UniMatrícula.
             </p>
